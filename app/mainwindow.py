@@ -29,7 +29,7 @@ class Form(QWidget):
 		self.setLayout(mainLayout)    
     
 		self.startButton.clicked.connect(self.initSimulation)
-		self.startButton.clicked.connect(self.doStep)
+		self.nextButton.clicked.connect(self.doStep)
 	
 		self.setWindowTitle("Robot localization demo")
 
