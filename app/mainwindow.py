@@ -47,7 +47,7 @@ class Form(QWidget):
 					qpoly = QPolygonF()
 					for x, y in poly.exterior.coords:						
 						qpoly.append(QPointF(x,y))
-					self.scene.addPolygon(qpoly, QPen(), QBrush(QColor(179,112,123)))
+					self.scene.addPolygon(qpoly, QPen(Qt.NoPen), QBrush(QColor(179,112,123)))
 			self.view.fitInView(self.scene.sceneRect())
 
 	def doStep(self):
