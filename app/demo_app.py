@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
 	app = QApplication(sys.argv)
 
-	screen = mainwindow.Form()
+	screen = mainwindow.MainWindow()
 	screen.show()
 
 	sys.exit(app.exec_())

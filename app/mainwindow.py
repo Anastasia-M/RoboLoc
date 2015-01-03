@@ -3,12 +3,12 @@
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from shapely.wkt import loads
-import re
 
-class Form(QWidget):
+from map import *
+
+class MainWindow(QWidget):
 	def __init__(self, parent=None):
-		super(Form, self).__init__(parent)
+		super(MainWindow, self).__init__(parent)
 
 		self.startButton = QPushButton("&Start")
 		self.nextButton = QPushButton("&Next")
@@ -34,21 +34,12 @@ class Form(QWidget):
 		self.setWindowTitle("Robot localization demo")
 
 	def initSimulation(self):
-
-		pattern = 'POLYGON.?\(\([0-9,\. \-]+\)\)'
-
-		with open('test_map.csv') as f:
-			content = f.readlines()
-			for line in content:
-				m = re.search(pattern, line)
-				if m:
-					poly = loads(m.group(0))
-					#print(poly.exterior.coords)
-					qpoly = QPolygonF()
-					for x, y in poly.exterior.coords:						
-						qpoly.append(QPointF(x,y))
-					self.scene.addPolygon(qpoly, QPen(Qt.NoPen), QBrush(QColor(179,112,123)))
-			self.view.fitInView(self.scene.sceneRect())
+		# Создаем карту из файла
+		test_map = load_map_from_wkt('test_map.csv')		
+		# Рисуем все объекты(полигоны) на карте
+		for poly in test_map.objects():
+			self.scene.addPolygon(poly, QPen(Qt.NoPen), QBrush(QColor(179,112,123))) 
+		self.view.fitInView(self.scene.sceneRect())
 
 	def doStep(self):
 		pass
