@@ -19,6 +19,15 @@ class Map:
 		for p in self.polygons:
 			yield p		
 
+	def bounding_box(self):
+		"""Возвращает прямоугольник который описывает границы карты
+		   https://ru.wikipedia.org/wiki/AABB
+
+		   Тип результата: QRectF
+		""" 
+		#Задание!!!: реализовать эту функцию. Результат будет нужен для генерации случайных частиц		
+		pass
+
 	def min_distance_to(self, point, direction):
 		"""Эта функция считает расстояние до ближайшего объекта карты в заданом направлении
 

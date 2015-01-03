@@ -33,13 +33,31 @@ class MainWindow(QWidget):
 	
 		self.setWindowTitle("Robot localization demo")
 
-	def initSimulation(self):
+		self.test_map = None # Переменная класса которая хранит карту
+		self.simulation = None # Переменная класса которая хранит текущий эксперимент
+
+	def init_simulation(self):
+		""" Обработка кнопки "Start". Начало нового эксперимента
+		"""
 		# Создаем карту из файла
-		test_map = load_map_from_wkt('test_map.csv')		
-		# Рисуем все объекты(полигоны) на карте
-		for poly in test_map.objects():
-			self.scene.addPolygon(poly, QPen(Qt.NoPen), QBrush(QColor(179,112,123))) 
+		self.test_map = load_map_from_wkt('test_map.csv')		
+		self.draw_map() #Рисуем карту
+
+		#Создаем новый эксперимент
+		number_of_particles = 100
+		self.simulation = Simulation(number_of_particles)
+		self.draw_particles() #вызываем функицю которая рисует частицы
 		self.view.fitInView(self.scene.sceneRect())
 
-	def doStep(self):
+	def do_step(self):
+		pass
+
+
+	def draw_map(self, test_map):
+		# Рисуем все объекты(полигоны) на карте		
+		for poly in self.test_map.objects():
+			self.scene.addPolygon(poly, QPen(Qt.NoPen), QBrush(QColor(179,112,123))) 
+		
+	def draw_particles(self):
+		# Задание!!!: Нарисовать частицы 
 		pass
