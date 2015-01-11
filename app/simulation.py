@@ -1,7 +1,6 @@
 from random import uniform
 
-
-
+#----------------------------------------------------------
 
 def generate_random_particles(envmap, N):
 	""" Эта функция генерирует N случайных частиц, равномерно расположеных на карте
@@ -21,7 +20,7 @@ def generate_random_particles(envmap, N):
 		result.append( (x, y, direction) )
 	return result
 
-
+#----------------------------------------------------------
 
 class Simulation():
 	""" Класс отвечает за симуляцию локализации робота
