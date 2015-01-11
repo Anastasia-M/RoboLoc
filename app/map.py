@@ -9,10 +9,12 @@ class Map:
 	def __init__(self):
 		# Карта это прото список полигонов
 		self.polygons = []
+		self.bbox = QRectF()
 
 	def add(self, poly):
 		"""Добавляет полигон на карту"""
 		self.polygons.append(poly)
+		self.bbox = self.bbox.united(poly.boundingRect())
 
 	def objects(self):
 		"""Итератор для объектов карты"""
@@ -22,11 +24,17 @@ class Map:
 	def bounding_box(self):
 		"""Возвращает прямоугольник который описывает границы карты
 		   https://ru.wikipedia.org/wiki/AABB
-
 		   Тип результата: QRectF
 		""" 
-		#Задание!!!: реализовать эту функцию. Результат будет нужен для генерации случайных частиц		
-		pass
+		return self.bbox
+
+	def is_occupied(self, x, y):
+		"""Эта функция возвращает True если координаты (x,y) занаяты объктом карты, напривер стеной
+		"""
+		for poly in self.polygons:
+			if poly.containsPoint(QPointF(x,y), Qt.OddEvenFill):
+				return True
+		return False
 
 	def min_distance_to(self, point, direction):
 		"""Эта функция считает расстояние до ближайшего объекта карты в заданом направлении
@@ -36,6 +44,8 @@ class Map:
 		   direction -- направление заданное в градусах(от 0 до 359).
 		"""
 		pass
+
+	
 
 
 #----------------------------------------------------------
