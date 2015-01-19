@@ -6,6 +6,7 @@ from PyQt5.QtGui import *
 
 from map import *
 from simulation import *
+import math
 
 class MainWindow(QWidget):
 	def __init__(self, parent=None):
@@ -53,7 +54,11 @@ class MainWindow(QWidget):
 		self.simulation = Simulation(number_of_particles, self.test_map)
 		self.draw_particles() #вызываем функицю которая рисует частицы
 		
+		self.draw_robot()
+
+
 	def do_step(self):
+		#self.simulation.move()
 		pass
 
 
@@ -61,7 +66,21 @@ class MainWindow(QWidget):
 		# Рисуем все объекты(полигоны) на карте		
 		for poly in self.test_map.objects():
 			self.scene.addPolygon(poly, QPen(Qt.NoPen), QBrush(QColor(179,112,123))) 
-		
+	
+	def draw_robot(self):
+		x, y, direction = self.simulation.robot_position
+
+		sx, sy = math.cos(direction), math.sin(direction)
+		sx1, sy1 = -math.sin(direction), math.cos(direction)
+
+		poly = QPolygonF()
+		poly.append(QPointF(x + 20*sx, y + 20*sy))
+		poly.append(QPointF(x + 8*sx1, y + 8*sy1))
+		poly.append(QPointF(x - 8*sx1, y - 8*sy1))
+
+		self.scene.addPolygon(poly, QPen(QColor(0,0,0)), QBrush(QColor(255,0,0))) 
+
+
 	def draw_particles(self):
 		for (x, y, direction) in self.simulation.particles():
 			self.scene.addEllipse(x - 2, y - 2, 4, 4) 
