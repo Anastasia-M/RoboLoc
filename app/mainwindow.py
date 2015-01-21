@@ -59,14 +59,18 @@ class MainWindow(QWidget):
 
 	def do_step(self):
 		#self.simulation.move()
-		pass
-
+		number_of_sensors = 10
+		max_sensor_range = 500		
+		x, y, robot_direction = self.simulation.robot_position
+		directions = [robot_direction + i * 2 * math.pi / number_of_sensors for i in range(0, number_of_sensors)]
+		sensor = [ self.test_map.min_distance_to((x,y), d, max_sensor_range) for d in directions ]
+		self.draw_sensor(sensor)
 
 	def draw_map(self):
-		# Рисуем все объекты(полигоны) на карте		
+		# Рисуем все объекты(полигоны) на карте	
 		for poly in self.test_map.objects():
 			self.scene.addPolygon(poly, QPen(Qt.NoPen), QBrush(QColor(179,112,123))) 
-	
+			
 	def draw_robot(self):
 		x, y, direction = self.simulation.robot_position
 
@@ -80,6 +84,16 @@ class MainWindow(QWidget):
 
 		self.scene.addPolygon(poly, QPen(QColor(0,0,0)), QBrush(QColor(255,0,0))) 
 
+	def draw_sensor(self, sensor):
+		robot_x, robor_y, _ = self.simulation.robot_position
+		for dist, (x, y) in sensor:
+			line = QLineF(QPointF(robot_x, robor_y), QPointF(x,y))
+			self.scene.addLine(line, QPen(QBrush(QColor(112,179,123)), 2, Qt.DashLine)) 
+
+		# Рисуем все объекты(полигоны) на карте	
+		for poly in self.test_map.objects():
+			self.scene.addPolygon(poly, QPen(Qt.NoPen), QBrush(QColor(179,112,123))) 
+	
 
 	def draw_particles(self):
 		for (x, y, direction) in self.simulation.particles():
