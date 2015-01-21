@@ -88,12 +88,7 @@ class MainWindow(QWidget):
 		robot_x, robor_y, _ = self.simulation.robot_position
 		for dist, (x, y) in sensor:
 			line = QLineF(QPointF(robot_x, robor_y), QPointF(x,y))
-			self.scene.addLine(line, QPen(QBrush(QColor(112,179,123)), 2, Qt.DashLine)) 
-
-		# Рисуем все объекты(полигоны) на карте	
-		for poly in self.test_map.objects():
-			self.scene.addPolygon(poly, QPen(Qt.NoPen), QBrush(QColor(179,112,123))) 
-	
+			self.scene.addLine(line, QPen(QBrush(QColor(112,179,123)), 2, Qt.DashLine)) 	
 
 	def draw_particles(self):
 		for (x, y, direction) in self.simulation.particles():
