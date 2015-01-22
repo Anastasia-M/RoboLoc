@@ -33,6 +33,9 @@ class Simulation():
 		self.particles_list = generate_random_particles(self.envmap, number_of_particles)
 		# Реальные координаты робота
 		self.robot_position = (400, 400, -math.pi/2)
+		self.number_of_sensors = 8
+		self.sensor_range = 500 
+
 
 	def particles(self):
 		"""Итератор для частиц"""
@@ -40,5 +43,8 @@ class Simulation():
 			yield p		
 
 	def move(self, new_position):
-		sensor = [self.envmap.min_distance_to(new_position, 2 * i * math.pi / N) for i in range(1, N)]	
-
+		self.robot_position = new_position
+		x, y, direction = self.robot_position		
+		directions = [direction + i * 2 * math.pi / self.number_of_sensors for i in range(0, self.number_of_sensors)]
+		sensor = [self.envmap.min_distance_to((x,y), d, self.sensor_range) for d in directions]	
+		return sensor

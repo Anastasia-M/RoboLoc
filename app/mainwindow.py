@@ -8,6 +8,65 @@ from map import *
 from simulation import *
 import math
 
+#------------------------------------------------------------------------------
+#
+class SceneObjects:
+	def __init__(self, graphics_scene):
+		self.scene = graphics_scene		
+		self.particles = None
+		self.cursor = None
+		self.sensor_beams = None
+
+	def draw_robot(self, pose):
+		x, y, direction = pose
+		sx, sy = math.cos(direction), math.sin(direction)
+		sx1, sy1 = -math.sin(direction), math.cos(direction)
+
+		poly = QPolygonF()
+		poly.append(QPointF(x + 20*sx, y + 20*sy))
+		poly.append(QPointF(x + 8*sx1, y + 8*sy1))
+		poly.append(QPointF(x - 8*sx1, y - 8*sy1))
+
+		if self.cursor == None:
+			self.cursor = self.scene.addPolygon(poly, QPen(QColor(0,0,0)), QBrush(QColor(255,0,0)))
+		else:
+			self.cursor.setPolygon(poly)	
+
+
+	def draw_particles(self, plist):		
+		if self.particles == None:
+			self.particles = [self.scene.addEllipse(x - 2, y - 2, 4, 4) for (x, y, _) in plist] 			
+		else:
+			i = 0
+			for (x,y,direction) in plist:
+				self.particles[i].sceneRect(x - 2, y - 2, 4, 4)		
+				i+=1
+
+	def draw_sensor(self, pose, sensor):
+		robot_x, robor_y, _ = pose
+		lines = [QLineF(QPointF(robot_x, robor_y), QPointF(x,y)) for _,(x,y) in sensor]
+		if self.sensor_beams == None:
+			self.sensor_beams = [self.scene.addLine(l, QPen(QBrush(QColor(112,179,123)), 2, Qt.DashLine)) for l in lines]
+		else:
+			i = 0
+			for l in lines:
+				self.sensor_beams[i].setLine(l)		
+				i+=1
+
+	def draw_map(self, envmap):
+		# Рисуем все объекты(полигоны) на карте	
+		for poly in envmap.objects():
+			self.scene.addPolygon(poly, QPen(Qt.NoPen), QBrush(QColor(179,112,123))) 
+	
+	def clear(self):
+		self.scene.clear()
+		self.cursor = None
+		self.particles = None
+		self.sensor_beams = None
+
+
+#------------------------------------------------------------------------------
+#
 class MainWindow(QWidget):
 	def __init__(self, parent=None):
 		super(MainWindow, self).__init__(parent)
@@ -37,59 +96,28 @@ class MainWindow(QWidget):
 
 		self.test_map = None # Переменная класса которая хранит карту
 		self.simulation = None # Переменная класса которая хранит текущий эксперимент
+		self.scene_objects = SceneObjects(self.scene) # Будет хранить все текущие объкты сцены		
 
 	def init_simulation(self):
 		""" Обработка кнопки "Start". Начало нового эксперимента
 		"""
 		# Очищаем экран - удаляем все что нарисовано
-		self.scene.clear()
+		self.scene_objects.clear()
 		
 		# Создаем карту из файла
 		self.test_map = load_map_from_wkt('test_map.csv')		
-		self.draw_map() #Рисуем карту
+		self.scene_objects.draw_map(self.test_map) #Рисуем карту
 		self.view.fitInView(self.scene.sceneRect())
 
 		#Создаем новый эксперимент
 		number_of_particles = 1000
 		self.simulation = Simulation(number_of_particles, self.test_map)
-		self.draw_particles() #вызываем функицю которая рисует частицы
-		
-		self.draw_robot()
-
+		self.scene_objects.draw_robot(self.simulation.robot_position)
+		self.scene_objects.draw_particles(self.simulation.particles())		
 
 	def do_step(self):
-		#self.simulation.move()
-		number_of_sensors = 10
-		max_sensor_range = 500		
-		x, y, robot_direction = self.simulation.robot_position
-		directions = [robot_direction + i * 2 * math.pi / number_of_sensors for i in range(0, number_of_sensors)]
-		sensor = [ self.test_map.min_distance_to((x,y), d, max_sensor_range) for d in directions ]
-		self.draw_sensor(sensor)
-
-	def draw_map(self):
-		# Рисуем все объекты(полигоны) на карте	
-		for poly in self.test_map.objects():
-			self.scene.addPolygon(poly, QPen(Qt.NoPen), QBrush(QColor(179,112,123))) 
-			
-	def draw_robot(self):
-		x, y, direction = self.simulation.robot_position
-
-		sx, sy = math.cos(direction), math.sin(direction)
-		sx1, sy1 = -math.sin(direction), math.cos(direction)
-
-		poly = QPolygonF()
-		poly.append(QPointF(x + 20*sx, y + 20*sy))
-		poly.append(QPointF(x + 8*sx1, y + 8*sy1))
-		poly.append(QPointF(x - 8*sx1, y - 8*sy1))
-
-		self.scene.addPolygon(poly, QPen(QColor(0,0,0)), QBrush(QColor(255,0,0))) 
-
-	def draw_sensor(self, sensor):
-		robot_x, robor_y, _ = self.simulation.robot_position
-		for dist, (x, y) in sensor:
-			line = QLineF(QPointF(robot_x, robor_y), QPointF(x,y))
-			self.scene.addLine(line, QPen(QBrush(QColor(112,179,123)), 2, Qt.DashLine)) 	
-
-	def draw_particles(self):
-		for (x, y, direction) in self.simulation.particles():
-			self.scene.addEllipse(x - 2, y - 2, 4, 4) 
+		x, y, direction = self.simulation.robot_position		
+		sensor = self.simulation.move((x, y - 20, direction))		
+		self.scene_objects.draw_sensor(self.simulation.robot_position, sensor)
+		self.scene_objects.draw_robot(self.simulation.robot_position)
+					
