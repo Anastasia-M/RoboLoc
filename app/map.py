@@ -41,6 +41,9 @@ class Map:
 	def is_occupied(self, x, y):
 		"""Эта функция возвращает True если координаты (x,y) занаяты объктом карты, напривер стеной
 		"""
+		if self.bbox.contains(gm.Point(x,y)) == True:
+			return True
+
 		for poly in self.polygons:
 			if poly.contains(gm.Point(x,y)):
 				return True

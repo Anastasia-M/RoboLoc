@@ -39,7 +39,7 @@ class SceneObjects:
 		else:
 			i = 0
 			for (x,y,direction) in plist:
-				self.particles[i].sceneRect(x - 2, y - 2, 4, 4)		
+				self.particles[i].setRect(x - 2, y - 2, 4, 4)		
 				i+=1
 
 	def draw_sensor(self, pose, sensor):
@@ -110,7 +110,7 @@ class MainWindow(QWidget):
 		self.view.fitInView(self.scene.sceneRect())
 
 		#Создаем новый эксперимент
-		number_of_particles = 1000
+		number_of_particles = 500
 		self.simulation = Simulation(number_of_particles, self.test_map)
 		self.scene_objects.draw_robot(self.simulation.robot_position)
 		self.scene_objects.draw_particles(self.simulation.particles())		
@@ -120,4 +120,5 @@ class MainWindow(QWidget):
 		sensor = self.simulation.move((x, y - 20, direction))		
 		self.scene_objects.draw_sensor(self.simulation.robot_position, sensor)
 		self.scene_objects.draw_robot(self.simulation.robot_position)
+		self.scene_objects.draw_particles(self.simulation.particles())		
 					

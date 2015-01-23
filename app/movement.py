@@ -17,18 +17,15 @@ def normal_angle(angle):
     return angle;
 
 
-def sample_odometry(np, start, end):
+def sample_odometry(np, start, control):
 	""" 
 	"""
 	x_s, y_s, dir_s = start
-	x_e, y_e, dir_e = end
+	dx, dy, ddir = control
 	
-	dx = x_e - x_s
-	dy = y_e - y_s
-
 	start_rotation = normal_angle(math.atan2(dy, dx) - dir_s)
 	transition = math.sqrt(dx * dx + dy * dy)
-	end_rotation = normal_angle(dir_e - dir_s - start_rotation)
+	end_rotation = normal_angle(ddir - start_rotation)
     
     # параметры шума 
 	params = [np[0] * start_rotation + np[1] * transition, np[2] * transition + np[3] * (start_rotation + end_rotation), np[0] * end_rotation + np[1] * transition]
@@ -68,16 +65,16 @@ if __name__ == '__main__':
 	#Шум только поворота
 	plt.subplot(222)
 	plt.title('Шум только поворота')
-	add_subplot(noise=[0.1,0.001,0,0], start =(10, 10, math.radians(0)), end = (40, 40, math.radians(90)))
+	add_subplot(noise=[0.1,0.001,0,0], start =(10, 10, math.radians(0)), end = (30, 30, math.radians(90)))
 
 	#Шум только поступательного движения
 	plt.subplot(223)
 	plt.title('Шум поступательного движения')
-	add_subplot(noise=[0,0,0.1,0.1], start =(10, 10, math.radians(0)), end = (40, 40, math.radians(90)))
+	add_subplot(noise=[0,0,0.1,0.1], start =(10, 10, math.radians(0)), end = (30, 30, math.radians(90)))
 
 	#Шум
 	plt.subplot(224)
 	plt.title('Шум и повотора и поступательного движения')
-	add_subplot(noise=[0.1,0.001, 0.05, 0.1], start =(10, 10, math.radians(0)), end = (40, 40, math.radians(90)))
+	add_subplot(noise=[0.1,0.001, 0.05, 0.1], start =(10, 10, math.radians(0)), end = (30, 30, math.radians(90)))
 	
 	plt.show()
