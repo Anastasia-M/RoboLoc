@@ -16,17 +16,28 @@ def normal_angle(angle):
         angle -= 2 * math.pi;
     return angle;
 
+#----------------------------------------------------------
+
+def get_control(old_position, new_position):
+	x_s, y_s, dir_s = old_position
+	x_e, y_e, dir_e = new_position
+	dx = x_e - x_s
+	dy = y_e - y_s
+
+	start_rotation = normal_angle(math.atan2(dy, dx) - dir_s)
+	transition = math.sqrt(dx * dx + dy * dy)
+	end_rotation = normal_angle(dir_e - dir_s - start_rotation)
+	
+	return (start_rotation, transition, end_rotation)
+
+#----------------------------------------------------------
 
 def sample_odometry(np, start, control):
 	""" 
 	"""
 	x_s, y_s, dir_s = start
-	dx, dy, ddir = control
-	
-	start_rotation = normal_angle(math.atan2(dy, dx) - dir_s)
-	transition = math.sqrt(dx * dx + dy * dy)
-	end_rotation = normal_angle(ddir - start_rotation)
-    
+	start_rotation, transition, end_rotation = control
+
     # параметры шума 
 	params = [np[0] * start_rotation + np[1] * transition, np[2] * transition + np[3] * (start_rotation + end_rotation), np[0] * end_rotation + np[1] * transition]
     

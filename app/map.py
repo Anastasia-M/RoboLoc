@@ -14,6 +14,7 @@ class Map:
 		# Карта это прото список полигонов
 		self.polygons = []
 		self.bbox = gm.box(0, 0, 0, 0)
+		self.bounds = self.bbox.bounds
 
 	def add(self, poly):
 		"""Добавляет полигон на карту"""
@@ -22,6 +23,7 @@ class Map:
 			self.bbox = self.bbox.union(poly.envelope)
 		else:
 			self.bbox = poly.envelope
+		self.bounds = self.bbox.bounds
 
 	def objects(self):
 		"""Итератор для объектов карты"""
@@ -34,15 +36,19 @@ class Map:
 		   https://ru.wikipedia.org/wiki/AABB
 		   Тип результата: QRectF
 		"""		
-		(xmin, ymin, xmax, ymax) = self.bbox.bounds
+		(xmin, ymin, xmax, ymax) = self.bounds
 		# Преобразуем в qt тип 
 		return QRectF(xmin, ymin, xmax - xmin, ymax - ymin)
+
+	def contains(self, x, y):
+		return self.bounding_box().contains(QPointF(x,y))
+
 
 	def is_occupied(self, x, y):
 		"""Эта функция возвращает True если координаты (x,y) занаяты объктом карты, напривер стеной
 		"""
-		if self.bbox.contains(gm.Point(x,y)) == True:
-			return True
+		#if self.contains(x, y) == True:
+		#	return True
 
 		for poly in self.polygons:
 			if poly.contains(gm.Point(x,y)):
@@ -71,7 +77,22 @@ class Map:
 						dist = d
 						end = p
 		return (dist, end)
-		
+
+
+	def min_distance(self, point, max_range):
+		"""Эта функция считает расстояние до ближайшего объекта карты во всех напрявлениях
+
+		   Аргументы:
+		   point -- точка от которой считаеться расстояние
+		   max_range -- максимальное растояние
+		"""
+		start = gm.Point(point)
+		dist = max_range		
+		for shape in self.polygons:
+			d = start.distance(shape)
+			if d < dist:
+				dist = d
+		return dist		
 
 #----------------------------------------------------------
 
@@ -91,6 +112,20 @@ def load_map_from_wkt(filename):
 				result_map.add(poly) # Добавляем полигон к карте
 
 	return result_map # Возвращаем карту
+
+#----------------------------------------------------------
+
+def build_occupancy_map(envmap, cell_size, max_range):
+	result = []
+	(xmin, ymin, xmax, ymax) = envmap.bbox.bounds
+	for iw in range(0, int((xmax-xmin)/cell_size)):
+		x = xmin + (iw + 0.5)*cell_size
+		col = []
+		for ih in range(0, int((ymax - ymin)/cell_size)):
+			y = ymin + (ih + 0.5)*cell_size
+			col.append(envmap.min_distance((x,y), max_range))
+		result.append(col)
+	return result
 
 
 #----------------------------------------------------------
@@ -117,11 +152,22 @@ if __name__ == '__main__':
 			self.test_map = Map()
 			self.test_map.add(gm.Polygon([(0,0), (0, 100), (10, 100), (10, 0)]))
 			self.test_map.add(gm.Polygon([(90,0), (90, 100), (100, 100), (100, 0)]))				
-			
+			self.test_map.add(gm.Polygon([(45,20), (45, 30), (55, 30), (55, 20)]))				
+
+			#Тестируем "карту заполнености
+			occupancy_map = build_occupancy_map(self.test_map, 1, 100)
+
+			image = QImage(100,100, QImage.Format_RGB32)
+			for i in range(0,len(occupancy_map)):
+				for j in range(0,len(occupancy_map[i])):
+					image.setPixel(i, j, 255*occupancy_map[i][j] / 50)
+			self.scene.addRect(self.test_map.bounding_box(), QPen(Qt.NoPen), QBrush(image))
+
 			# Рисуем карту
 			for poly in self.test_map.objects():
 				self.scene.addPolygon(poly, QPen(Qt.NoPen), QBrush(QColor(179,112,123))) 
 			self.view.fitInView(self.scene.sceneRect())
+
 
 			# Тест нашего дальномера
 			# Меряем растояние до стенок по 16 различным направления, и рисуем лучи дальномера
@@ -132,6 +178,7 @@ if __name__ == '__main__':
 					_, (x, y) = res
 					line = QLineF(QPointF(50,50), QPointF(x,y))
 					self.scene.addLine(line, QPen(QBrush(QColor(112,179,123)),0.5,Qt.DashLine)) 
+
 
 
 	app = QApplication(sys.argv)
