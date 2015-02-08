@@ -43,7 +43,8 @@ class SimulationScene:
 		else:
 			i = 0
 			for (x,y,direction) in plist:
-				self.particles[i].setRect(x - 2, y - 2, 4, 4)		
+				self.particles[i].setRect(x - 2, y - 2, 4, 4)
+				self.particles[i].setVisible(True)		
 				i+=1
 
 	def draw_sensor(self, pose, sensor):
@@ -60,10 +61,17 @@ class SimulationScene:
 				i+=1
 
 	def draw_map(self, envmap):
+		if self.map_object != None:
+			for item in self.map_object:
+				item.setVisible(True)
+			return
+
+		self.map_object = []
 		# Рисуем все объекты(полигоны) на карте	
 		for poly in envmap.objects():
 			item = self.scene.addPolygon(poly, QPen(Qt.NoPen), QBrush(QColor(179,112,123))) 
 			item.setZValue(1)
+			self.map_object.append(item)
 		self.view.fitInView(self.scene.sceneRect())
 		
 	def draw_occupancy(self, envmap, cellsize, values, max_range):
@@ -88,6 +96,17 @@ class SimulationScene:
 			for item in self.belief_map:
 				item.setVisible(False)
 
+	def hide_particles(self):
+		if self.particles != None:
+			for item in self.particles:
+				item.setVisible(False)
+
+	def hide_map(self):
+		if self.map_object != None:
+			for item in self.map_object:
+				item.setVisible(False)
+
+
 	def hide_sensor(self):
 		if self.sensor_beams != None:
 			[item.setVisible(False) for item in self.sensor_beams]
@@ -102,3 +121,4 @@ class SimulationScene:
 		self.cursor = None
 		self.particles = None
 		self.sensor_beams = None
+		self.map_object = None

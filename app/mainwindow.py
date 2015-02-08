@@ -44,16 +44,24 @@ class MainWindow(QWidget):
 		self.show_beams_cbox.setChecked(True)
 		self.show_robot_cbox = QCheckBox("Робот")
 		self.show_robot_cbox.setChecked(True)
-		self.show_belief_map_cbox = QCheckBox("Belief map")
+		self.show_map_cbox = QCheckBox("Карта")
+		self.show_map_cbox.setChecked(True)
+		self.show_particles_cbox= QCheckBox("Частицы")
+		self.show_particles_cbox.setChecked(True)
+		self.show_belief_map_cbox = QCheckBox("Likelihood maps")
 
 		self.show_belief_map_cbox.stateChanged.connect(self.view_options_changed)
 		self.show_robot_cbox.stateChanged.connect(self.view_options_changed)
 		self.show_beams_cbox.stateChanged.connect(self.view_options_changed)
+		self.show_particles_cbox.stateChanged.connect(self.view_options_changed)
+		self.show_map_cbox.stateChanged.connect(self.view_options_changed)
 
 		view_group = QGroupBox("Вид");
 		view_group_layout = QVBoxLayout()
 		view_group_layout.addWidget(self.show_beams_cbox)
 		view_group_layout.addWidget(self.show_robot_cbox)
+		view_group_layout.addWidget(self.show_map_cbox)
+		view_group_layout.addWidget(self.show_particles_cbox)		
 		view_group_layout.addWidget(self.show_belief_map_cbox)
 		view_group.setLayout(view_group_layout)
 
@@ -110,8 +118,11 @@ class MainWindow(QWidget):
 		if self.show_belief_map_cbox.isChecked():		
 			self.scene.draw_occupancy(self.test_map, self.simulation.occupancy_map_cell, self.simulation.occupancy_map, 500)
 		
-		self.scene.draw_map(self.test_map)
-		self.scene.draw_particles(self.simulation.particles())		
+		if self.show_map_cbox.isChecked():
+			self.scene.draw_map(self.test_map)
+		
+		if self.show_particles_cbox.isChecked():
+			self.scene.draw_particles(self.simulation.particles())		
 		
 		if self.show_robot_cbox.isChecked():
 			self.scene.draw_robot(self.path[0])
@@ -160,6 +171,17 @@ class MainWindow(QWidget):
 
 		if not self.show_robot_cbox.isChecked():
 			self.scene.hide_robot()
+
+		if self.show_map_cbox.isChecked():
+			self.scene.draw_map(self.test_map)
+		else:
+			self.scene.hide_map()
+
+		if self.show_particles_cbox.isChecked():
+			self.scene.draw_particles(self.simulation.particles())		
+		else:
+			self.scene.hide_particles()
+		
 
 		if not self.show_beams_cbox.isChecked():
 			self.scene.hide_sensor()
